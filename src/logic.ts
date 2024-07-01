@@ -1,4 +1,4 @@
-import type { PlayerId, RuneClient } from "rune-games-sdk/multiplayer"
+import type { PlayerId, DuskClient } from "dusk-games-sdk"
 
 export const SLOW_DOWN = 0.995;
 
@@ -71,7 +71,7 @@ export type GameActions = {
 }
 
 declare global {
-  const Rune: RuneClient<GameState, GameActions>
+  const Dusk: DuskClient<GameState, GameActions>
 }
 
 function reportWinner(game: GameState) {
@@ -82,12 +82,12 @@ function reportWinner(game: GameState) {
     result[player.id] = winner === player ? "WON" : "LOST";
   }
 
-  Rune.gameOver({
+  Dusk.gameOver({
     players: result
   })
 }
 
-Rune.initLogic({
+Dusk.initLogic({
   minPlayers: 1,
   maxPlayers: 4,
   setup: (allPlayersIds: string[]): GameState => {
@@ -95,7 +95,7 @@ Rune.initLogic({
       players: {},
       nextSprite: 0,
       items: {},
-      endGame: Rune.gameTime() + (1 * 60000),
+      endGame: Dusk.gameTime() + (1 * 60000),
       events: [],
       gameStart: 0,
       gameOver: false,
@@ -128,6 +128,7 @@ Rune.initLogic({
 
     return state;
   },
+  reactive: false,
   landscape: true,
   updatesPerSecond: 30,
   events: {
@@ -155,29 +156,29 @@ Rune.initLogic({
     context.game.events = [];
 
     if (!Object.values(context.game.players).every(p => p.ready)) {
-      context.game.endGame = Rune.gameTime() + (1 * 60000);
+      context.game.endGame = Dusk.gameTime() + (1 * 60000);
       return;
     }
     if (context.game.gameStart === 0) {
-      context.game.gameStart = Rune.gameTime() + 4000;
+      context.game.gameStart = Dusk.gameTime() + 4000;
     }
-    if (Rune.gameTime() < context.game.gameStart) {
-      context.game.endGame = Rune.gameTime() + (1 * 60000);
+    if (Dusk.gameTime() < context.game.gameStart) {
+      context.game.endGame = Dusk.gameTime() + (1 * 60000);
       return;
     }
     if (!context.game.gameOver) {
       if (Object.values(context.game.players).every(p => p.dead)) {
         context.game.gameOver = true;
         context.game.gameOverReason = "All out!";
-        context.game.reportWinnerAt = Rune.gameTime() + 1000;
+        context.game.reportWinnerAt = Dusk.gameTime() + 1000;
       }
-      if (context.game.endGame < Rune.gameTime()) {
+      if (context.game.endGame < Dusk.gameTime()) {
         context.game.gameOver = true;
         context.game.gameOverReason = "Time over!";
-        context.game.reportWinnerAt = Rune.gameTime() + 1000;
+        context.game.reportWinnerAt = Dusk.gameTime() + 1000;
       }
     }
-    if (context.game.reportWinnerAt < Rune.gameTime() && context.game.gameOver) {
+    if (context.game.reportWinnerAt < Dusk.gameTime() && context.game.gameOver) {
       reportWinner(context.game);
       return;
     }
@@ -214,31 +215,31 @@ Rune.initLogic({
           p.x -= p.vx;
           context.game.events.push({ xp, item: context.game.items[xp], playerId: p.id, type: GameEventType.HIT });
           delete context.game.items[xp];
-          p.lastBounce = Rune.gameTime();
+          p.lastBounce = Dusk.gameTime();
         } else if (context.game.items[xp] !== Item.GAP && context.game.items[xp] !== Item.GAP2 && context.game.items[xp] !== Item.FLYING && context.game.items[xp] && p.y > -8) {
           p.vx = -20;
           p.vy = -10;
           p.x -= p.vx;
           context.game.events.push({ xp, item: context.game.items[xp], playerId: p.id, type: GameEventType.HIT });
           delete context.game.items[xp];
-          p.lastBounce = Rune.gameTime();
+          p.lastBounce = Dusk.gameTime();
         }
       }
     }
   },
   actions: {
     speed: ({ speed }, context) => {
-      if (Rune.gameTime() < context.game.gameStart) {
+      if (Dusk.gameTime() < context.game.gameStart) {
         return;
       }
 
       const player = context.game.players[context.playerId];
-      if (player && !player.dead && Rune.gameTime() - player.lastBounce > 500) {
+      if (player && !player.dead && Dusk.gameTime() - player.lastBounce > 500) {
         player.vx = speed;
       }
     },
     jump: (_, context) => {
-      if (Rune.gameTime() < context.game.gameStart) {
+      if (Dusk.gameTime() < context.game.gameStart) {
         return;
       }
 
