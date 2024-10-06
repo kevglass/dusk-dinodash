@@ -1,7 +1,7 @@
 import { graphics, sound } from "toglib";
 import { ASSETS } from "./lib/assets";
 import { GameActions, GameEventType, GameState, Item, Player, SLOW_DOWN } from "./logic";
-import { OnChangeParams } from "dusk-games-sdk";
+import { OnChangeParams } from "rune-sdk";
 
 export interface PlayerSprite {
     run: graphics.TileSet;
@@ -151,7 +151,7 @@ export class DinoDash implements graphics.Game {
         }
         if (this.waitingForReady) {
             if (Math.abs(y - graphics.height() / 2) < 50) {
-                Dusk.actions.ready();
+                Rune.actions.ready();
                 sound.playSound(this.sfxReady);
             }
             return;
@@ -178,7 +178,7 @@ export class DinoDash implements graphics.Game {
                     }
                 } else {
                     // jump
-                    Dusk.actions.jump();
+                    Rune.actions.jump();
                     sound.playSound(this.sfxJump);
                 }
             }
@@ -217,7 +217,7 @@ export class DinoDash implements graphics.Game {
         }
 
         if (key === ' ') {
-            Dusk.actions.jump();
+            Rune.actions.jump();
             sound.playSound(this.sfxJump);
         }
     }
@@ -227,7 +227,7 @@ export class DinoDash implements graphics.Game {
     }
 
     waitingForStart(): boolean {
-        return !!this.game && this.game.gameStart > Dusk.gameTime();
+        return !!this.game && this.game.gameStart > Rune.gameTime();
     }
 
     gameUpdate(update:  OnChangeParams<GameState, GameActions>): void {
@@ -253,7 +253,7 @@ export class DinoDash implements graphics.Game {
                 sound.playSound(this.sfxEnd, 0.5);
             }
         }
-        if (Dusk.gameTime() < 1000) {
+        if (Rune.gameTime() < 1000) {
             if (!this.restarted) {
                 this.waitingForReady = true;
                 this.speed = 0;
@@ -328,7 +328,7 @@ export class DinoDash implements graphics.Game {
     resourcesLoaded(): void {
         // initialise the Rune SDK and register the callback to get
         // game updates
-        Dusk.initClient({
+        Rune.initClient({
             onChange: (update) => {
                 this.gameUpdate(update);
             },
@@ -345,7 +345,7 @@ export class DinoDash implements graphics.Game {
             if (this.lastSpeed !== this.speed) {
                 this.lastSpeed = this.speed;
                 this.lastSend = Date.now();
-                Dusk.actions.speed({ speed: this.speed });
+                Rune.actions.speed({ speed: this.speed });
             }
         }
     }
@@ -514,7 +514,7 @@ export class DinoDash implements graphics.Game {
             graphics.drawText(6, 21, distance, this.font, "black");
             graphics.drawText(5, 20, distance, this.font);
 
-            const secondsRemaining = Math.floor((this.game.endGame - Dusk.gameTime()) / 1000);
+            const secondsRemaining = Math.floor((this.game.endGame - Rune.gameTime()) / 1000);
             const secs = Math.max(0, secondsRemaining % 60);
             const mins = Math.max(Math.floor(secondsRemaining / 60));
             const secsStr = secs < 10 ? "0" + secs : "" + secs;
@@ -549,7 +549,7 @@ export class DinoDash implements graphics.Game {
             }
         }
 
-        const untilStart = this.game.gameStart - Dusk.gameTime()
+        const untilStart = this.game.gameStart - Rune.gameTime()
         if (this.waitingForStart()) {
             if (untilStart > 2000) {
                 const msg = "Ready?";
@@ -578,7 +578,7 @@ export class DinoDash implements graphics.Game {
             const players = Object.values(this.game.players);
             const winner = players.reduce((a, b) => a.x > b.x ? a : b);
             graphics.fillRect(0, 55, graphics.width(), 25, "rgba(0,0,0,0.5)");
-            const winnerInfo = Dusk.getPlayerInfo(winner.id);
+            const winnerInfo = Rune.getPlayerInfo(winner.id);
             if (winnerInfo) {
                 graphics.drawText(58, 73, winnerInfo.displayName, this.font);
             }
@@ -596,9 +596,9 @@ export class DinoDash implements graphics.Game {
                 }
 
                 graphics.fillRect(0, 55, graphics.width(), 25, "rgba(0,0,0,0.5)");
-                const playerInfo = Dusk.getPlayerInfo(player.id);
+                const playerInfo = Rune.getPlayerInfo(player.id);
                 if (playerInfo) {
-                    graphics.drawText(58, 73, Dusk.getPlayerInfo(player.id).displayName, this.font);
+                    graphics.drawText(58, 73, Rune.getPlayerInfo(player.id).displayName, this.font);
                 }
                 const distance = Math.floor((player.x - 60) / 50) + "m";
                 graphics.drawText(graphics.width() - 10 - graphics.textWidth(distance, this.font), 75, distance, this.font);
